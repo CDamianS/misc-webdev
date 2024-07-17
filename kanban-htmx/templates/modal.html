@@ -1,0 +1,23 @@
+<% deftemplate modal () () %>
+<dialog x-bind:open="openModal">
+  <article>
+    <header>
+      <button class="close" aria-label="Close" @click="openModal = false"></button>
+      <h2>Create Task</h2>
+    </header>
+    <form hx-post="/create-task" hx-target="body">
+      <input required name="title" type="text" placeholder="title" aria-label="Text"/>
+      <input required name="description" type="text" placeholder="description" aria-label="Text"/>
+      <select required name="status">
+	<option selected disabled value="">Status</option>
+	<option value="to-do">To do</option>
+	<option value="doing">Doing</option>
+	<option value="done">Done</option>
+      </select>
+      <footer class="container-fluid">
+	<button @click="openModal = false" type="submit">Create</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+<% end %>

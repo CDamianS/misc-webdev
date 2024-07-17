@@ -1,0 +1,70 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '("websocket-driver" "jingle" "eco" "clack" "jonathan") :silent t))
+
+(defpackage :web-chat
+  (:use :cl
+   :websocket-driver
+   :jingle))
+(in-package :web-chat)
+
+;; Defining server and templates
+(eco:compile-pathname #P"templates/index.html")
+
+(defvar *web-chat* (make-app))
+
+(setf (route *web-chat* "/")
+      (eco-template:index))
+
+;; Websocket logic :o
+(defvar *connections* (make-hash-table))
+
+(defun extract-message (json)
+  (cdr (assoc "chatMessage" (jojo:parse json :as :alist) :test #'string=)))
+
+(defun handle-new-connection (con)
+  (setf (gethash con *connections*)
+	(format nil "User-~A"
+		(random 1000))))
+
+(defun broadcast-to-room (connection message)
+  (let ((message (eco-template:message (gethash connection *connections*)
+				       (extract-message message))))
+    (loop for con being the hash-key of *connections* do
+      (wsd:send con message))))
+
+(defun handle-close-connection (connection)
+  (let ((message (eco-template:exit-chat
+		  (gethash connection *connections*))))
+    (remhash connection *connections*)
+    (loop for con being the hash-key of *connections* do
+      (wsd:send con message))))
+
+(defun chat-server (env)
+  (let ((ws (websocket-driver:make-server env)))
+    (wsd:on :open ws
+	    (lambda () (handle-new-connection ws)))
+    (wsd:on :message ws
+	    (lambda (msg)
+	      (broadcast-to-room ws msg)))
+    (wsd:on :close ws
+	    (lambda (&key code reason)
+	      (declare (ignore code reason))
+	      (handle-close-connection ws)))
+    (lambda (responder)
+      (declare (ignore responder))
+      (wsd:start-connection ws))))
+
+(defun main ()
+  (format t "Press RET to stop the server~%")
+  (defvar *chat-handler* (clack:clackup #'chat-server :port 1234))
+  (start *web-chat*)
+  (read-line)
+  (stop *web-chat*)
+  (setf *chat-handler* nil))
+;;; vim: set ft=lisp lisp:

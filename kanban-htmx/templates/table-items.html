@@ -1,0 +1,17 @@
+<% deftemplate table-items (items) () %>
+<% loop for (id title description) in items do %>
+<div class="container">
+<article x-data="{ showActions: false }"
+	 @mouseover="showActions = true"
+	 @mouseleave="showActions = false">
+  <header>
+  <h3><%= title %></h3>
+  </header>
+  <p><%= description %></p>
+  <footer x-show="showActions">
+    <button hx-delete="/delete-task/<%= id %>" hx-target="body" class="secondary">Delete</button>
+  </footer>
+</article>
+</div>
+<% end %>
+<% end %>

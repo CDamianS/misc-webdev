@@ -1,0 +1,7 @@
+#+title: Web Dev Testing
+
+** Currently trying out minimalist frameworks and libraries like:
+- [[https://alpinejs.dev/][Alpine.js]]
+- [[https://htmx.org/][HTMX]]
+
+** Using mostly Common Lisp for the BackEnd

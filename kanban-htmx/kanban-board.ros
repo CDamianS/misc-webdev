@@ -1,0 +1,70 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '("eco" "jingle" "sqlite") :silent t))
+
+(defpackage :kanban-board
+  (:use :cl
+   :jingle
+   :eco))
+(in-package :kanban-board)
+
+;; Define app, db, and html templates
+(defvar *kanban-board* (make-app))
+(defvar *db* (sqlite:connect #P"kanban-board.db"))
+(compile-pathname #P"templates/table-items.html")
+(compile-pathname #P"templates/table.html")
+(compile-pathname #P"templates/modal.html")
+(compile-pathname #P"templates/navbar.html")
+(compile-pathname #P"templates/index.html")
+
+;; Helper functions
+(defun fetch-items (status)
+  (sqlite:execute-to-list *db*
+    (format nil "SELECT * FROM tasks where status = '~A'" status)))
+
+(defun create-task (name description status)
+  (sqlite:execute-non-query *db* "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)" name description status))
+
+(defun delete-task (id)
+  (sqlite:execute-non-query *db* "DELETE FROM tasks WHERE id = ?" id))
+
+;; Routing
+(setf (route *kanban-board* "/")
+      #'(lambda (req)
+	  (declare (ignore req))
+	  (eco-template:index
+	   (fetch-items "to-do")
+	   (fetch-items "doing")
+	   (fetch-items "done"))))
+
+(setf (route *kanban-board* "/delete-task/:id" :method :delete)
+      #'(lambda (params)
+	  (let ((id (jingle:get-request-param params :id)))
+	    (delete-task id)
+	    (eco-template:index
+	     (fetch-items "to-do")
+	     (fetch-items "doing")
+	     (fetch-items "done")))))
+
+(setf (route *kanban-board* "/create-task" :method :post)
+      #'(lambda (params)
+	  (let ((title (get-request-param params "title"))
+		(desc (get-request-param params "description"))
+		(status (get-request-param params "status")))
+	    (create-task title desc status)
+	    (eco-template:index
+	     (fetch-items "to-do")
+	     (fetch-items "doing")
+	     (fetch-items "done")))))
+
+(defun main ()
+  (format t "Press RET to stop the server~%")
+  (start *kanban-board*)  
+  (read-line)
+  (stop *kanban-board*))
+;;; vim: set ft=lisp lisp:

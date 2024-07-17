@@ -1,0 +1,12 @@
+<% deftemplate table (name &optional items) () %>
+<div class="container">
+<h1><strong><%= name %></strong></h1>
+<div id="<%= name %>">
+<% if items %>
+  <%- table-items items %><% end %>
+<% else %>
+  No items.
+<% end %>
+</div>
+</div>
+<% end %>

@@ -1,0 +1,20 @@
+#+title: Kanban Board
+
+** Minimalist Kanban board experiment
+**** Using HTMX, AlpineJS and PicoCSS for a frontend
+**** Using Common Lisp with Eco for templating and jingle for a trivial webapp
+
+** Running it
+This system is basically a [[https://roswell.github.io/][Roswell]] script that compiles the "templates/" directory, load the sqlite3 database and starts a webapp.
+Tried to keep it as minimal as possible, backend is less than 70 lines long and no html file is more than 25 lines.
+
+To run it with roswell you can:
+#+begin_src bash
+./kanban-board.ros
+#+end_src
+and open http://localhost:5000
+
+** TODOS
+- Get [[https://sortablejs.github.io/Sortable/][SortableJS]] to gain drag and drop functions
+- Editable cards
+

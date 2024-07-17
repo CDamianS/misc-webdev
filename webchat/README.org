@@ -1,0 +1,15 @@
+#+title: Kanban Board
+
+** Minimalist Kanban board experiment
+**** Using HTMX, and PicoCSS for a frontend
+**** Using Common Lisp with Eco for templating, websocket-driver for the real-time communication and jingle for a trivial webapp
+
+Wanted to try out websockets in common lisp and also how they work on HTMX
+
+** Running it
+To run it with roswell you can:
+#+begin_src bash
+./web-chat.ros
+#+end_src
+and open http://localhost:5000
+  

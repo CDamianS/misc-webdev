@@ -1,0 +1,44 @@
+<% deftemplate index () () %>
+<!doctype html>
+<html lang="en" >
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Web chat</title>
+    <script src="https://unpkg.com/htmx.org@2.0.1"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <nav style="padding: 10px">
+	<h1><strong>Web chat</strong></h1>
+    </nav>
+    <div hx-ext="ws" ws-connect="ws://localhost:1234/chat">
+      <div id="chatRoom"></div>
+      <div style="bottom: 0; position: fixed; width: 100%; padding: 10px">
+	<!-- added timeout to reset -->
+      <form id="form" ws-send role="group" onsubmit="setTimeout(() => { form.reset(); }, 100); ">
+        <input name="chatMessage" />
+	<button type="submit">Send</button>
+      </form>
+      </div>
+    </div>
+  </body>
+</html>
+<% end %>
+
+<% deftemplate message (user msg) () %>
+<div id="chatRoom" hx-swap-oob="beforeend">
+  <h4><strong><%= user %>:</strong> <%= msg %></h4>
+</div>
+<% end %>
+
+<% deftemplate exit-chat (user) () %>
+<div id="chatRoom" hx-swoap-oob="beforeend">
+  <h4><strong><%= user %> has left the room</strong></h4>
+</div>
+<% end %>
